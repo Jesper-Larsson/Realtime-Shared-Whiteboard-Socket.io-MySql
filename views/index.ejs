@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<head>
+    <title>Whiteboard</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+</head>
+<body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.3/socket.io.js"></script>
+<canvas onmousedown="pressDown(event)" onmouseover="pressUp()" onmouseup="pressUp()" onmousemove="draw(event)" id="imgCanvas" style="border:1px solid #000000;"
+          width="1000" height="750"></canvas>
+          <br/>
+          <button onclick="setColor(value)" value = "#11520b">PENCIL</button>
+          <button onclick="setColor(value)" value = "#ffffff">ERASER</button>
+          <button onclick="cleanBoard()">CLEAN BOARD</button>
+          </br>
+          </br>
+          <input type="text" id="imageName" placeholder = "name your image here">
+          <button onclick="saveImage()">SAVE</button>
+          <b style="display: none; color:red;" id="error"> Invalid name! </b>
+          <b style="display: none; color:green;" id="sucess"> Success! </b>
+          </br>
+          <input type="text" id="openImage" placeholder = "select image">
+          <button onclick="openImage()">OPEN</button>
+<script src="/js/connection.js"></script>
+<script>
+
+    var canvas = document.getElementById("imgCanvas");
+    var context = canvas.getContext("2d");
+    var down = false;
+    var color = "#11520b";
+    function pressDown(event){
+      down = true;
+      draw(event);
+      console.log("down");
+    }
+    function pressUp(){
+      down = false;
+      console.log("up");
+    }
+    function draw(event){
+        if(down){
+            var pos = getMousePos(canvas, event);
+            sendDraw(pos, color)
+        }
+    }
+
+    function cleanBoard(){
+      sendClean()
+    }
+
+    function openImage(){
+      wipeBoard()
+      sendOpen(document.getElementById("openImage").value)
+    }
+    function saveImage(){
+      if(document.getElementById("imageName").value != undefined &&
+          document.getElementById("imageName").value != ""){
+            sendSave(document.getElementById("imageName").value)
+          }else{
+            document.getElementById("sucess").style.display = "none";
+            document.getElementById("error").style.display = "inline";
+          }
+    }
+    function showSuccess(){
+      document.getElementById("error").style.display = "none";
+      document.getElementById("sucess").style.display = "inline";
+    }
+    function wipeBoard(){
+      context.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function colorRect(position, pickedColor){
+      var size = 4;
+      context.fillStyle = pickedColor;
+      context.fillRect (position.x, position.y, size, size);
+    }
+
+    function getMousePos(canvas, evt) {
+        var rect = canvas.getBoundingClientRect();
+        return {
+          x: evt.clientX - rect.left,
+          y: evt.clientY - rect.top
+        };
+    }
+
+    function setColor(value){
+      color = value;
+    }
+</script>
+
+</body>
+</html>
